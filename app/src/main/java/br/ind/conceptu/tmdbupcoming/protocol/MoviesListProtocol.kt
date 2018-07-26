@@ -7,11 +7,15 @@ interface MoviesListProtocol {
     interface View {
         fun setLoadingPage(loading:Boolean)
         fun setLoadingMovies(loading:Boolean)
-        fun updateMoviesList(movies:List<Movie>)
+        fun onGetMoviesListSuccess(movies:List<Movie>)
+        fun onGetMoviesListFailure()
+        fun onConfigurationSuccess()
+        fun onConfigurationFailure()
     }
 
     interface Presenter {
         fun getMoviesList(page:Int = 1)
+        fun syncConfigurations()
     }
 
     interface NetworkHandler {
