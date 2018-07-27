@@ -1,6 +1,7 @@
 package br.ind.conceptu.tmdbupcoming.presenter
 
 import android.content.Context
+import br.ind.conceptu.tmdbupcoming.model.Genre
 import br.ind.conceptu.tmdbupcoming.network.handler.MoviesListNetworkHandler
 import br.ind.conceptu.tmdbupcoming.network.handler.ServerConfigurationsNetworkHandler
 import br.ind.conceptu.tmdbupcoming.persistance.SharedPreferencesManager
@@ -12,19 +13,27 @@ class MoviesListPresenter(private val view:MoviesListProtocol.View, private val 
     private val configurationsNetworkHandler = ServerConfigurationsNetworkHandler()
     private val moviesListNetworkHandler = MoviesListNetworkHandler()
 
-    override fun getMoviesList(page: Int) {
+    override fun getMoviesPage(page: Int){
+        view.setLoadingPage(true)
         moviesListNetworkHandler.getMoviesList(page).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    if (page == 1){
-                        view.setLoadingMovies(false)
-                    }
-                    else{
-                        view.setLoadingPage(false)
-                    }
-                    view.onGetMoviesListSuccess(it)
+                    view.setLoadingPage(false)
+                    view.onGetMoviesPageSuccess(it.results, page)
                 }, {
-                    view.onGetMoviesListFailure()
+                    view.onGetMoviesPageFailure(page)
+                    view.setLoadingPage(false)
+                })
+    }
+
+    override fun getStartingMovies(){
+        moviesListNetworkHandler.getMoviesList(1).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    view.setLoadingMovies(false)
+                    view.onGetStartingMoviesSuccess(it)
+                }, {
+                    view.onGetStartingMoviesFailure()
                 })
     }
 
@@ -52,6 +61,18 @@ class MoviesListPresenter(private val view:MoviesListProtocol.View, private val 
                     view.onConfigurationSuccess()
                 }, {
                     view.onConfigurationFailure()
+                })
+    }
+
+    override fun syncGenres() {
+        view.setLoadingMovies(true)
+        configurationsNetworkHandler.getGenres().subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    SharedPreferencesManager.setStaticContent(SharedPreferencesManager.StaticContentType.GENRE, it.toString(), context)
+                    view.onSyncGenreSuccess()
+                }, {
+                    view.onSyncGenreFailure()
                 })
     }
 }

@@ -1,18 +1,20 @@
 package br.ind.conceptu.tmdbupcoming.adapter
 
 import android.content.Context
+import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import br.ind.conceptu.tmdbupcoming.R
 import br.ind.conceptu.tmdbupcoming.model.Movie
+import br.ind.conceptu.tmdbupcoming.network.ServerContentManager
 import br.ind.conceptu.tmdbupcoming.persistance.SharedPreferencesManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.movie_list_item.view.*
 
-class MovieListAdapter(var movies:MutableList<Movie>) : RecyclerView.Adapter<MovieListAdapter.ViewHolder>(){
+class MovieListAdapter(private var movies:MutableList<Movie>) : RecyclerView.Adapter<MovieListAdapter.ViewHolder>(){
 
     companion object {
         const val LOADING_PAGE_TYPE = 1
@@ -21,7 +23,12 @@ class MovieListAdapter(var movies:MutableList<Movie>) : RecyclerView.Adapter<Mov
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return ViewHolder(inflater.inflate(R.layout.movie_list_item, parent, false))
+        return if (viewType == LOADING_PAGE_TYPE){
+            ViewHolder(inflater.inflate(R.layout.loading_list_item, parent, false))
+        }
+        else{
+            ViewHolder(inflater.inflate(R.layout.movie_list_item, parent, false))
+        }
     }
 
     fun replaceAllMovies(movies: MutableList<Movie>) {
@@ -30,9 +37,9 @@ class MovieListAdapter(var movies:MutableList<Movie>) : RecyclerView.Adapter<Mov
     }
 
     fun insertMovies(movies: MutableList<Movie>){
-        val lastIndexBeforeInsertion = this.movies.lastIndex
+        val lastIndexBeforeInsertion = this.movies.size - 1
         this.movies.addAll(movies)
-        notifyItemRangeInserted(lastIndexBeforeInsertion, this.movies.lastIndex)
+        notifyItemRangeChanged(lastIndexBeforeInsertion, this.movies.size)
     }
 
     fun setLoadingPage(loading:Boolean){
@@ -40,7 +47,7 @@ class MovieListAdapter(var movies:MutableList<Movie>) : RecyclerView.Adapter<Mov
             val dummyMovie = Movie()
             dummyMovie.loadingMovieDummy = true
             this.movies.add(dummyMovie)
-            notifyItemInserted(this.movies.lastIndex)
+            notifyItemInserted(this.movies.size)
         }
         else{
             val indexOfLoading = this.movies.indexOfFirst { it.loadingMovieDummy }
@@ -68,22 +75,26 @@ class MovieListAdapter(var movies:MutableList<Movie>) : RecyclerView.Adapter<Mov
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(item: Movie, itemViewType:Int) = with(itemView) {
-            if (itemViewType == LOADING_PAGE_TYPE){
-
-            }
-            else{
+            if (itemViewType == MOVIE_TYPE){
                 val imageUrl = SharedPreferencesManager.getBaseImageUrl(true, context)
-                val allPostersImages = SharedPreferencesManager.getStaticContent(SharedPreferencesManager.StaticContentType.POSTER, context)
+                val allPostersImages = ServerContentManager.getPosterSizes(context)
 
-                val completeImageUrl = imageUrl + allPostersImages.last() //+ item.imagePath...
+                val completeImageUrl = imageUrl + allPostersImages.last() + item.poster_path
 
                 val options = RequestOptions()
                         .fitCenter()
                         .placeholder(R.drawable.ic_film)
 
                 Glide.with(context).load(completeImageUrl).apply(options).into(itemView.moviePoster)
-                itemView.movieTitle.text //= item.title
-                itemView.movieRelease
+                itemView.movieTitle.text = item.title
+                itemView.movieRelease.text = item.release_date
+
+                itemView.movieRating.rating = item.vote_average.toFloat()
+
+
+                genreList.layoutManager = GridLayoutManager(context, 1, GridLayoutManager.HORIZONTAL, false)
+                val genres = ServerContentManager.getGenres(context).filter { item.genre_ids.contains(it.id) }
+                genreList.adapter = GenreAdapter(genres)
             }
         }
     }

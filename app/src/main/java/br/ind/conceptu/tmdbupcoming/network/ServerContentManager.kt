@@ -1,6 +1,7 @@
 package br.ind.conceptu.tmdbupcoming.network
 
 import android.content.Context
+import br.ind.conceptu.tmdbupcoming.model.Genre
 import br.ind.conceptu.tmdbupcoming.network.handler.ServerConfigurationsNetworkHandler
 import br.ind.conceptu.tmdbupcoming.persistance.SharedPreferencesManager
 import com.google.gson.Gson
@@ -21,6 +22,15 @@ object ServerContentManager {
 
     private var maxRetries = 5
     private var currentRetries = 0
+
+    fun getGenres(context: Context):List<Genre>{
+        val listType = object : TypeToken<List<Genre>>() {}.type
+        val jsonArrayString = SharedPreferencesManager.getStaticContent(SharedPreferencesManager.StaticContentType.GENRE, context)
+        if (!jsonArrayString.isEmpty()){
+            return Gson().fromJson(jsonArrayString, listType)
+        }
+        return listOf()
+    }
 
     fun getBackdropSizes(context: Context):List<String>{
         val listType = object : TypeToken<List<String>>() {}.type

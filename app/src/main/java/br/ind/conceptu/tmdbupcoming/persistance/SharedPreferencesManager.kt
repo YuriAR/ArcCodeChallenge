@@ -10,7 +10,8 @@ object SharedPreferencesManager {
         POSTER(posterSizesComplementKey),
         PROFILE(profileSizesComplementKey),
         STILL(stillSizesComplementKey),
-        BACKDROP(backdropSizesComplementKey)
+        BACKDROP(backdropSizesComplementKey),
+        GENRE(genreComplementKey)
     }
 
     private const val imageUrlKey = "IMAGE_URL_"
@@ -23,6 +24,7 @@ object SharedPreferencesManager {
     private const val profileSizesComplementKey = "PROFILE_SIZES"
     private const val stillSizesComplementKey = "STILL_SIZES"
     private const val backdropSizesComplementKey = "BACKDROP_SIZES"
+    private const val genreComplementKey = "GENRE"
 
     fun setStaticContent(contentType:StaticContentType, content:String, context: Context){
         val preferences = PreferenceManager.getDefaultSharedPreferences(context)

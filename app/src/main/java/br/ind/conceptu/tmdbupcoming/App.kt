@@ -13,6 +13,7 @@ class App: Application() {
     override fun onCreate() {
         super.onCreate()
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+        instance = this
     }
 
     fun getRequestQueue(): RequestQueue? {

@@ -1,21 +1,31 @@
 package br.ind.conceptu.tmdbupcoming.view
 
 import android.content.Intent
-import android.graphics.Movie
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import br.ind.conceptu.tmdbupcoming.R
-import br.ind.conceptu.tmdbupcoming.network.ServerContentManager
+import br.ind.conceptu.tmdbupcoming.adapter.MovieListAdapter
+import br.ind.conceptu.tmdbupcoming.model.Movie
+import br.ind.conceptu.tmdbupcoming.model.MovieResult
 import br.ind.conceptu.tmdbupcoming.presenter.MoviesListPresenter
 import br.ind.conceptu.tmdbupcoming.protocol.MoviesListProtocol
 import kotlinx.android.synthetic.main.activity_upcoming_movies.*
 
 class UpcomingMoviesActivity : AppCompatActivity(), MoviesListProtocol.View {
 
-    lateinit var presenter:MoviesListProtocol.Presenter
+    private var currentPage = 1
+    private var lastPage = 0
+
+    lateinit var presenter: MoviesListProtocol.Presenter
+    lateinit var moviesAdapter: MovieListAdapter
+
+    private var loadingPage = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,34 +35,73 @@ class UpcomingMoviesActivity : AppCompatActivity(), MoviesListProtocol.View {
         presenter = MoviesListPresenter(this,this)
         presenter.syncConfigurations()
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-        }
+        moviesList.layoutManager = LinearLayoutManager(this)
+        moviesAdapter = MovieListAdapter(mutableListOf())
+        moviesList.adapter = moviesAdapter
+
+        moviesList.addOnScrollListener( object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (loadingPage || currentPage > lastPage) return
+                val layoutManager = moviesList.layoutManager as LinearLayoutManager
+                val visibleItemCount = layoutManager.childCount
+                val totalItemCount = layoutManager.itemCount
+                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+                if (visibleItemCount + firstVisibleItemPosition >= totalItemCount
+                        && firstVisibleItemPosition >= 0
+                        && totalItemCount >= PAGE_SIZE) {
+                    loadingPage = true
+                    presenter.getMoviesPage(currentPage + 1)
+                }
+            }
+        })
     }
 
     override fun setLoadingMovies(loading: Boolean) {
-        //TODO: Set loading whole view
+        loadingView.visibility = if (loading) View.VISIBLE else View.GONE
+        moviesList.visibility = if (loading) View.GONE else View.VISIBLE
     }
 
     override fun setLoadingPage(loading: Boolean) {
-        //TODO: Add/remove loading cell at the bottom of recycler view
+        if (loading != loadingPage){
+            loadingPage = loading
+            moviesAdapter.setLoadingPage(loading)
+        }
     }
 
-    override fun onGetMoviesListSuccess(movies: List<Movie>) {
-
+    override fun onGetStartingMoviesSuccess(result: MovieResult) {
+        lastPage = result.total_pages
+        moviesAdapter.replaceAllMovies(result.results.toMutableList())
     }
 
-    override fun onGetMoviesListFailure() {
+    override fun onGetStartingMoviesFailure() {
+        //TODO: Show error alert
+    }
+
+    override fun onGetMoviesPageSuccess(movies: List<Movie>, page: Int) {
+        currentPage = page
+        moviesAdapter.insertMovies(movies.toMutableList())
+    }
+
+    override fun onGetMoviesPageFailure(page: Int) {
         //TODO: Show error alert
     }
 
     override fun onConfigurationSuccess() {
-        presenter.getMoviesList()
+        presenter.syncGenres()
     }
 
     override fun onConfigurationFailure() {
         //TODO: Show error alert
+    }
+
+    override fun onSyncGenreSuccess() {
+        presenter.getStartingMovies()
+    }
+
+    override fun onSyncGenreFailure() {
+        //TODO:Show error alert
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -68,5 +117,9 @@ class UpcomingMoviesActivity : AppCompatActivity(), MoviesListProtocol.View {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    companion object {
+        const val PAGE_SIZE = 20
     }
 }
