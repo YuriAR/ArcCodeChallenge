@@ -32,6 +32,8 @@ class UpcomingMoviesActivity : AppCompatActivity(), MoviesListProtocol.View {
         setContentView(R.layout.activity_upcoming_movies)
         setSupportActionBar(toolbar)
 
+        supportActionBar?.title = getString(R.string.upcoming_movies)
+
         presenter = MoviesListPresenter(this,this)
         presenter.syncConfigurations()
 

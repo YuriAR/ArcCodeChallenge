@@ -19,15 +19,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
+            app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:expandedTitleTextAppearance="@style/TextAppearance.AppCompat.Title"
             app:toolbarId="@+id/toolbar">
-
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin"
-                app:popupTheme="@style/AppTheme.PopupOverlay" />
 
             <ImageView
                 android:id="@+id/movieBackdropImage"
@@ -39,6 +34,13 @@
                 android:fitsSystemWindows="true"
                 android:tint="#33000000"
                 app:layout_collapseMode="parallax" />
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
@@ -53,14 +55,30 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <RelativeLayout
+                android:id="@+id/loadingView"
+                android:visibility="gone"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ProgressBar
+                    android:layout_marginTop="50dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </RelativeLayout>
+
             <android.support.constraint.ConstraintLayout
+                android:id="@+id/detailsView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
                 <ImageView
                     android:id="@+id/moviePoster"
-                    android:layout_width="100dp"
-                    android:layout_height="190dp"
+                    android:layout_width="135dp"
+                    android:layout_height="200dp"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="8dp"
                     android:src="@color/colorPrimary"
@@ -118,14 +136,14 @@
                     app:layout_constraintTop_toBottomOf="@+id/avgScore" />
 
                 <TextView
+                    android:id="@+id/voteCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:textSize="13sp"
                     android:text="(151)"
                     app:layout_constraintBottom_toBottomOf="@+id/movieRating"
-                    app:layout_constraintStart_toEndOf="@+id/movieRating"
-                    app:layout_constraintTop_toBottomOf="" />
+                    app:layout_constraintStart_toEndOf="@+id/movieRating" />
 
                 <TextView
                     android:id="@+id/movieGenres"

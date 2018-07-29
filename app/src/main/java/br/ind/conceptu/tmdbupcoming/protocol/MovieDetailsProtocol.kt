@@ -6,7 +6,8 @@ import io.reactivex.Single
 interface MovieDetailsProtocol {
     interface View {
         fun setLoadingDetails(loading:Boolean)
-        fun updateMovieDetails(details:MovieDetails)
+        fun onMovieDetailsSuccess(details:MovieDetails)
+        fun onMovieDetailsFailure()
     }
 
     interface Presenter {

@@ -1,6 +1,7 @@
 package br.ind.conceptu.tmdbupcoming.adapter
 
 import android.content.Context
+import android.content.Intent
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -10,6 +11,8 @@ import br.ind.conceptu.tmdbupcoming.R
 import br.ind.conceptu.tmdbupcoming.model.Movie
 import br.ind.conceptu.tmdbupcoming.network.ServerContentManager
 import br.ind.conceptu.tmdbupcoming.persistance.SharedPreferencesManager
+import br.ind.conceptu.tmdbupcoming.util.DateUtil
+import br.ind.conceptu.tmdbupcoming.view.MovieDetailActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.movie_list_item.view.*
@@ -87,7 +90,7 @@ class MovieListAdapter(private var movies:MutableList<Movie>) : RecyclerView.Ada
 
                 Glide.with(context).load(completeImageUrl).apply(options).into(itemView.moviePoster)
                 itemView.movieTitle.text = item.title
-                itemView.movieRelease.text = item.release_date
+                itemView.movieRelease.text = DateUtil.formatServerDate(item.release_date)
 
                 itemView.movieRating.rating = item.vote_average.toFloat()
 
@@ -95,6 +98,17 @@ class MovieListAdapter(private var movies:MutableList<Movie>) : RecyclerView.Ada
                 genreList.layoutManager = GridLayoutManager(context, 1, GridLayoutManager.HORIZONTAL, false)
                 val genres = ServerContentManager.getGenres(context).filter { item.genre_ids.contains(it.id) }
                 genreList.adapter = GenreAdapter(genres)
+
+                val allBackdropImages = ServerContentManager.getBackdropSizes(context)
+                val imageBackdropPath = imageUrl + allBackdropImages.last() + item.backdrop_path
+
+                itemView.setOnClickListener {
+                    val intent = Intent(context, MovieDetailActivity::class.java)
+                    intent.putExtra("movieId", item.id)
+                    intent.putExtra("movieTitle", item.title)
+                    intent.putExtra("backdropImagePath", imageBackdropPath)
+                    context.startActivity(intent)
+                }
             }
         }
     }
