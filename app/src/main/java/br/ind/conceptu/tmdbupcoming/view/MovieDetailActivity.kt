@@ -12,6 +12,7 @@ import br.ind.conceptu.tmdbupcoming.persistance.SharedPreferencesManager
 import br.ind.conceptu.tmdbupcoming.presenter.MovieDetailsPresenter
 import br.ind.conceptu.tmdbupcoming.protocol.MovieDetailsProtocol
 import br.ind.conceptu.tmdbupcoming.util.DateUtil
+import br.ind.conceptu.tmdbupcoming.util.DialogUtils
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.activity_movie_detail.*
@@ -72,6 +73,16 @@ class MovieDetailActivity : AppCompatActivity(), MovieDetailsProtocol.View {
     }
 
     override fun onMovieDetailsFailure() {
-        //TODO
+        DialogUtils.showDialogWithDoubleAction(
+                this,
+                getString(R.string.error),
+                getString(R.string.details_loading_error),
+                getString(R.string.retry),
+                getString(R.string.cancel),
+                Runnable {
+                    //Positive action
+                    presenter.getMovieDetails(movieId)
+                },
+                null)
     }
 }
