@@ -3,6 +3,7 @@ package br.ind.conceptu.tmdbupcoming.view
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.GridLayoutManager
+import android.view.MenuItem
 import android.view.View
 import br.ind.conceptu.tmdbupcoming.R
 import br.ind.conceptu.tmdbupcoming.adapter.GenreAdapter
@@ -29,6 +30,8 @@ class MovieDetailActivity : AppCompatActivity(), MovieDetailsProtocol.View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_movie_detail)
         setSupportActionBar(toolbar)
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         movieId = intent.getIntExtra("movieId", 0)
         movieTitle = intent.getStringExtra("movieTitle")
@@ -73,16 +76,22 @@ class MovieDetailActivity : AppCompatActivity(), MovieDetailsProtocol.View {
     }
 
     override fun onMovieDetailsFailure() {
-        DialogUtils.showDialogWithDoubleAction(
-                this,
+        DialogUtils.showRetryDialogWithAction(this,
                 getString(R.string.error),
                 getString(R.string.details_loading_error),
-                getString(R.string.retry),
-                getString(R.string.cancel),
                 Runnable {
                     //Positive action
                     presenter.getMovieDetails(movieId)
-                },
-                null)
+        })
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when(item?.itemId){
+            android.R.id.home -> {
+                finish()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 }

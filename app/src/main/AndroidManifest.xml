@@ -29,6 +29,7 @@
         <activity
             android:name=".view.MovieDetailActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".view.SearchMovieActivity"></activity>
     </application>
 
 </manifest>
