@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">TMDb Upcoming</string>
+    <string name="action_about">About</string>
+    <string name="action_search">Search</string>
+
+    <string name="search_title">Search for movies</string>
+
+    <string name="upcoming_movies">Upcoming Movies</string>
+    <string name="arc_touch_title">ArcTouch Code Challenge</string>
+    <string name="developed_by">Developed by Yuri Anfrisio Reis</string>
+    <string name="free_pik_credits">Images by Freepik</string>
+
+    <string name="retry">Retry</string>
+    <string name="cancel">Cancel</string>
+    <string name="error">Error</string>
+    <string name="movies_loading_error">There was an error loading the list of upcoming movies. Please, try again.</string>
+    <string name="details_loading_error">There was an error loading the list of upcoming movies. Please, try again.</string>
+    <string name="configuration_error">There was an error configuring the app. Please, try again.</string>
+    <string name="search_loading_error">There was an error when searching for movies. Please, try again.</string>
+
+    <string name="empty_search">No search results to show.</string>
+</resources>
