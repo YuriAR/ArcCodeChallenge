@@ -16,22 +16,21 @@ class MovieSearchNetworkHandler: MovieSearchProtocol.NetworkHandler {
 
         val parameters = HashMap<String, String>()
         parameters["api_key"] = ServerContentManager.tmdbKey
-        parameters["query"] = query
+        parameters["query"] = query.replace(" ", "+")
 
         val url = ServerContentManager.getUrlWithPath(path, parameters)
 
         return Single.create { subscriber ->
             val request = object : StringRequest(Method.GET, url, { response ->
-                Thread({
+                Thread {
                     if (!response.isNullOrEmpty()){
                         val responseJson = JSONObject(response)
                         subscriber.onSuccess(MovieResult.fromJsonObject(responseJson))
-                    }
-                    else{
+                    } else{
                         val throwable = Throwable("No results found")
                         subscriber.onError(throwable)
                     }
-                }).start()
+                }.start()
             }, { error ->
                 subscriber.onError(error)
             }) {
