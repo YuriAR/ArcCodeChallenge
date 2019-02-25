@@ -10,6 +10,7 @@ import android.support.v7.widget.SearchView
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.test.espresso.idling.CountingIdlingResource
 import br.ind.conceptu.tmdbupcoming.R
 import br.ind.conceptu.tmdbupcoming.adapter.MovieListAdapter
 import br.ind.conceptu.tmdbupcoming.model.MovieResult
@@ -20,6 +21,7 @@ import kotlinx.android.synthetic.main.activity_search_movie.*
 
 class SearchMovieActivity : AppCompatActivity(), SearchView.OnQueryTextListener, MovieSearchProtocol.View {
 
+    val countingIdlingResource = CountingIdlingResource("SearchResource")
     private var searchView:SearchView? = null
     private lateinit var presenter:MovieSearchProtocol.Presenter
     private lateinit var moviesAdapter: MovieListAdapter
@@ -79,19 +81,22 @@ class SearchMovieActivity : AppCompatActivity(), SearchView.OnQueryTextListener,
     override fun setEmptyView(empty: Boolean) {
         loadingView.visibility = View.GONE
         emptyView.visibility = if (empty) View.VISIBLE else View.GONE
-        loadingView.visibility = if (empty) View.GONE else View.VISIBLE
+        searchResultList.visibility = if (empty) View.GONE else View.VISIBLE
     }
 
     override fun onSearchForMoviesSuccess(result: MovieResult) {
+        countingIdlingResource.decrement()
         moviesAdapter.replaceAllMovies(result.results.toMutableList())
     }
 
     override fun onSearchForMoviesFailure(query: String) {
+        countingIdlingResource.decrement()
         DialogUtils.showRetryDialogWithAction(this,
                 getString(R.string.error),
                 getString(R.string.search_loading_error),
                 Runnable {
                     //Positive action
+                    countingIdlingResource.increment()
                     presenter.searchForMoviesWithString(query)
                 })
     }
@@ -102,6 +107,7 @@ class SearchMovieActivity : AppCompatActivity(), SearchView.OnQueryTextListener,
 
     override fun onQueryTextSubmit(query: String?): Boolean {
         query?.let {
+            countingIdlingResource.increment()
             presenter.searchForMoviesWithString(it)
             return true
         }
